@@ -94,57 +94,25 @@ class MatchAnalysisRequest(BaseModel):
     league_id: int
     season: int
 
-class MatchAnalysisResponse(BaseModel):
-    analysis: str
-    match_id: str
-    home_team: str
-    away_team: str
-
 class PreMatchReportRequest(BaseModel):
     fixture_id: int
-
-class PreMatchReportResponse(BaseModel):
-    report: str
-    fixture_id: str
-    home_team: str
-    away_team: str
 
 class PredictionRequest(BaseModel):
     fixture_id: int
 
-class PredictionResponse(BaseModel):
-    fixture_id: int
-    home_win_probability: float
-    draw_probability: float
-    away_win_probability: float
-    under_25_probability: Optional[float] = None
-    over_25_probability: Optional[float] = None
-    btts_yes_probability: Optional[float] = None
-    btts_no_probability: Optional[float] = None
-    most_likely_score: Optional[str] = None
-    expected_goals_home: Optional[float] = None
-    expected_goals_away: Optional[float] = None
-    advice: Optional[str] = None
-    error: Optional[str] = None
-    raw_output: Optional[str] = None
-
 class BettingAnalysisRequest(BaseModel):
     fixture_id: int
 
-class BettingAnalysisResponse(BaseModel):
-    analysis: str
-    fixture_id: str
-    home_team: str
-    away_team: str
+class AnalysisReportRequest(BaseModel):
+    """Request model for generating analysis reports."""
+    fixture_id: int
+    report_type: str = Field(..., description="Type of report to generate: 'pre-match', 'in-play', 'post-match', 'comprehensive'")
+    additional_instructions: Optional[str] = Field(None, description="Additional instructions for the AI report generator")
 
 class ChatRequest(BaseModel):
     query: str
     context_type: Optional[str] = None  # "fixture", "team", "league"
     context_id: Optional[int] = None
-
-class ChatResponse(BaseModel):
-    response: str
-    query: str
 
 # Database models
 class CompetitionCreate(BaseModel):
@@ -386,3 +354,61 @@ class OddsDBResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+# Modele odpowiedzi dla endpointów analizy
+class MatchAnalysisResponse(BaseResponse):
+    """Response model for match analysis endpoint."""
+    pass
+
+class PreMatchAnalysisResponse(BaseResponse):
+    """Response model for pre-match analysis endpoint."""
+    pass
+
+class InPlayAnalysisResponse(BaseResponse):
+    """Response model for in-play analysis endpoint."""
+    pass
+
+class PostMatchAnalysisResponse(BaseResponse):
+    """Response model for post-match analysis endpoint."""
+    pass
+
+class BettingAnalysisResponse(BaseModel):
+    """Response model for betting analysis endpoint."""
+    response: Dict[str, Any]
+
+class ValueBetsResponse(BaseModel):
+    """Response model for value bets endpoint."""
+    response: List[Dict[str, Any]]
+
+class TeamFormAnalysisResponse(BaseModel):
+    """Response model for team form analysis endpoint."""
+    response: Dict[str, Any]
+
+class TeamComparisonResponse(BaseModel):
+    """Response model for team comparison endpoint."""
+    response: Dict[str, Any]
+
+class ChatResponse(BaseModel):
+    """Response model for AI chat endpoint."""
+    response: str
+    query: str
+
+class AnalysisReportResponse(BaseModel):
+    """Response model for analysis report endpoint."""
+    response: Dict[str, Any]
+
+class PredictionResponse(BaseModel):
+    fixture_id: int
+    home_win_probability: float
+    draw_probability: float
+    away_win_probability: float
+    under_25_probability: Optional[float] = None
+    over_25_probability: Optional[float] = None
+    btts_yes_probability: Optional[float] = None
+    btts_no_probability: Optional[float] = None
+    most_likely_score: Optional[str] = None
+    expected_goals_home: Optional[float] = None
+    expected_goals_away: Optional[float] = None
+    advice: Optional[str] = None
+    error: Optional[str] = None
+    raw_output: Optional[str] = None

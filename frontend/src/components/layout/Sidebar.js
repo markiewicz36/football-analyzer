@@ -46,6 +46,14 @@ const Sidebar = () => {
             <i className="fas fa-money-bill-wave sidebar-icon"></i>
             <span>Betting</span>
           </NavLink>
+          <ul className="sidebar-submenu">
+            <li className="sidebar-subitem">
+              <NavLink to="/betting/value-bets" className={({ isActive }) => isActive ? "sidebar-sublink active" : "sidebar-sublink"}>
+                <i className="fas fa-percentage sidebar-icon"></i>
+                <span>Value Bets</span>
+              </NavLink>
+            </li>
+          </ul>
         </li>
         <li className="sidebar-item">
           <NavLink to="/ai-chat" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
