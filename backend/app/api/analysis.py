@@ -619,3 +619,78 @@ async def compare_teams(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error comparing teams: {str(e)}")
+
+
+@router.get("/trending-bets", response_model=schemas.TrendingBetsResponse)
+async def get_trending_bets(
+        min_fixtures: int = Query(10, description="Minimum number of fixtures to analyze for trends"),
+        db: Session = Depends(get_db)
+):
+    """
+    Get trending betting patterns and opportunities based on historical data.
+    Identifies patterns like teams that consistently perform better/worse than bookmaker expectations.
+    """
+    try:
+        trending_bets = await analysis_service.identify_trending_bets(min_fixtures)
+        return {"response": trending_bets}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching trending bets: {str(e)}")
+
+
+@router.get("/advanced-stats/{fixture_id}", response_model=schemas.AdvancedStatsResponse)
+async def get_advanced_statistics(
+        fixture_id: int = Path(..., description="Fixture ID"),
+        db: Session = Depends(get_db)
+):
+    """
+    Get advanced statistics for a fixture including xG, PPDA, progressive passes, and more.
+    """
+    try:
+        advanced_stats = await analysis_service.calculate_advanced_statistics(fixture_id)
+        return {"response": advanced_stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating advanced statistics: {str(e)}")
+
+
+@router.get("/leagues/{league_id}/patterns", response_model=schemas.LeaguePatternsResponse)
+async def analyze_league_patterns(
+        league_id: int = Path(..., description="League ID"),
+        season: int = Query(None, description="Season (e.g., 2023)"),
+        db: Session = Depends(get_db)
+):
+    """
+    Analyze patterns and trends for a specific league.
+    Identifies common scorelines, booking patterns, goal timing, etc.
+    """
+    try:
+        # If season is not provided, use current season
+        if not season:
+            current_year = datetime.now().year
+            current_month = datetime.now().month
+            season = current_year if current_month > 7 else current_year - 1
+
+        patterns = await analysis_service.analyze_league_patterns(league_id, season)
+        return {"response": patterns}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing league patterns: {str(e)}")
+
+
+@router.post("/simulate-match", response_model=schemas.MatchSimulationResponse)
+async def simulate_match(
+        request: schemas.MatchSimulationRequest = Body(...),
+        db: Session = Depends(get_db)
+):
+    """
+    Run a Monte Carlo simulation of a match to generate detailed outcome probabilities.
+    """
+    try:
+        simulation_results = await analysis_service.simulate_match(
+            request.home_team_id,
+            request.away_team_id,
+            request.league_id,
+            request.season,
+            request.num_simulations
+        )
+        return {"response": simulation_results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error simulating match: {str(e)}")
